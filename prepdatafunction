@@ -1,0 +1,12 @@
+if (msg.tweet.geo) {
+	msg.payload = {"meld": msg.payload,"name": msg.tweet.user.name,"lat":msg.tweet.coordinates.coordinates[1],"lon":msg.tweet.coordinates.coordinates[0]};
+	node.send(msg);
+	}else{
+	    if (msg.location['place']){
+	        msg.payload = {"meld": msg.payload,"name": msg.tweet.user.name, "sted": JSON.stringify(msg.location['place'])};
+	    node.send(msg);
+	    }else{
+	      msg.payload = {"meld": msg.payload,"name": msg.tweet.user.name};
+	      node.send(msg);
+	  }
+}
