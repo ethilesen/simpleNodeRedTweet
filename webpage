@@ -1,11 +1,11 @@
 <!DOCTYPE HTML>
 <html>
     <head>
-    <title>Simple Live Display</title>
+    <title>Simple Live Twitter feed View</title>
      <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css"/>
      <script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
      <style>
-         #mapid { height: 180px; }
+         #messages {overflow-y:scroll;}
      </style>
     <script type="text/javascript">
         var mymap;
@@ -17,10 +17,6 @@
         // This needs to point to the web socket in the Node-RED flow
         // ... in this case it's ws/simple
         wsUri += "//" + loc.host + loc.pathname.replace("simple","ws/simple");
-
-
-
-
         function wsConnect() {
             console.log("connect",wsUri);
             mymap = L.map('mapid').setView([58.505, 10.09], 1);
@@ -30,7 +26,7 @@
 				'<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
 				'Imagery © <a href="http://mapbox.com">Mapbox</a>',
 			id: 'mapbox.streets'
-		}).addTo(mymap);
+		    }).addTo(mymap);
             ws = new WebSocket(wsUri);
             //var line = "";    // either uncomment this for a building list of messages
             ws.onmessage = function(msg) {
@@ -39,10 +35,11 @@
                 var data = JSON.parse(msg.data);
                 console.log(data);
                 // build the output from the topic and payload parts of the object
-                line = "<p>From: "+data.name+ " Messge: " +data.meld+ " Location: "+data.sted+"</p>";
-                // replace the messages div with the new "line"
+                line = "<p style=\"font-weight: bold\">From: <a style=\"font-weight: normal\">" +data.name+ "<a style=\"font-weight: bold\"> Message: <a style=\"font-weight: normal\">" +data.meld;
+                 // replace the messages div with the new "line"
                 document.getElementById('messages').innerHTML += line;
-                //ws.send(JSON.stringify({data:data}));
+                var div = document.getElementById('messages');
+                div.scrollTop = div.scrollHeight - div.clientHeight;
                 if(data.lat){
                 drawmap(data.lat,data.lon,data.meld,data.name);
                 }
@@ -67,23 +64,19 @@
 
         function drawmap(lat,lon,meld,name){
         L.marker([lat, lon]).addTo(mymap)
-			.bindPopup("<b>"+name+" </b>" +meld+" ").openPopup();
-
+		.bindPopup("<b>"+name+" </b>" +meld+" ").openPopup();
         }
     </script>
     </head>
     <body onload="wsConnect();" onunload="ws.disconnect();">
-        <h1>Simple Live Display</h1>
+        <h1>Simple Live Twitter feed View</h1>
         <div id="status">unknown</div>
-
-
-        <div id="mapid" style="width: 95%; height: 300px"></div>
-        <font face="Arial">
-        <div id="messages"></div>
-
         <hr/>
-
+        <div id="mapid" style="width: 100%; height: 300px"></div>
+        <hr/>
+        <font face="Arial">
+        <div style="overflow-y: auto; height:150px; " id="messages"></div>
+        <hr/>
         </font>
-
     </body>
 </html>
